@@ -85,17 +85,33 @@ if __name__ == '__main__':
         # Edit code here -- Update the model definition
         # You will need a dense last layer with 10 output channels to classify the 10 classes
         # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
-	tf.keras.layers.Conv2D(filters=64, kernel_size=[5,5], padding='same', activation='relu'),
-	#tf.keras.layers.BatchNormalization(),
-        tf.keras.layers.MaxPool2D(pool_size=[2,2], strides=2),
+	tf.keras.layers.Conv2D(filters=32, kernel_size=[3,3], padding='same', activation='relu'),
+        tf.keras.layers.BatchNormalization(),
+        tf.keras.layers.Conv2D(filters=32, kernel_size=[3,3], padding='same', activation='relu'),
+        tf.keras.layers.BatchNormalization(),
+        tf.keras.layers.MaxPool2D([2,2]),
+        tf.keras.layers.Dropout(rate=0.2),
+
+        tf.keras.layers.Conv2D(filters=64, kernel_size=[3,3], padding='same', activation='relu'),
+        tf.keras.layers.BatchNormalization(),
+        tf.keras.layers.Conv2D(filters=64, kernel_size=[3,3], padding='same', activation='relu'),
+        tf.keras.layers.BatchNormalization(),
+        tf.keras.layers.MaxPool2D([2,2]),
+        tf.keras.layers.Dropout(rate=0.3),
+
         tf.keras.layers.Conv2D(filters=128, kernel_size=[3,3], padding='same', activation='relu'),
-        #tf.keras.layers.BatchNormalization(),
-        tf.keras.layers.MaxPool2D(pool_size=[2,2], strides=2),
+        tf.keras.layers.BatchNormalization(),
+        tf.keras.layers.Conv2D(filters=128, kernel_size=[3,3], padding='same', activation='relu'),
+        tf.keras.layers.BatchNormalization(),
+        tf.keras.layers.MaxPool2D([2,2]),
+        tf.keras.layers.Dropout(rate=0.4),
+
 	layers.Flatten(),
-	layers.Dense(1024, activation='relu'),
+	layers.Dense(128, activation='relu'),
+        tf.keras.layers.BatchNormalization(),
 	tf.keras.layers.Dropout(rate=0.5),
         # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-        tf.keras.layers.Dense(10)
+        tf.keras.layers.Dense(10, activation='softmax')
     ])
 
     # Log the training hyper-parameters for WandB
@@ -106,7 +122,7 @@ if __name__ == '__main__':
         # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
         "learning_rate": 0.001,
         "optimizer": "adam",
-        "epochs": 10,
+        "epochs": 15,
         "batch_size": 32
         # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     }
@@ -119,7 +135,7 @@ if __name__ == '__main__':
 
     history = model.fit(
         ds_cifar10_train,
-        epochs=10,
+        epochs=15,
         validation_data=ds_cifar10_test,
         callbacks=[WandbMetricsLogger()]
     )
