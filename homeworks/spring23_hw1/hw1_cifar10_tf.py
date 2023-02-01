@@ -122,7 +122,7 @@ if __name__ == '__main__':
         # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
         "learning_rate": 0.001,
         "optimizer": "adam",
-        "epochs": 15,
+        "epochs": 50,
         "batch_size": 32
         # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     }
@@ -135,7 +135,7 @@ if __name__ == '__main__':
 
     history = model.fit(
         ds_cifar10_train,
-        epochs=15,
+        epochs=50,
         validation_data=ds_cifar10_test,
         callbacks=[WandbMetricsLogger()]
     )
