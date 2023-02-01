@@ -30,7 +30,7 @@ if __name__ == '__main__':
     wandb.init(
         project="hw1_spring2023",  # Leave this as 'hw1_spring2023'
         entity="bu-spark-ml",  # Leave this
-        group="<your_BU_username>",  # <<<<<<< Put your BU username here
+        group="bown",  # <<<<<<< Put your BU username here
         notes="Minimal model"  # <<<<<<< You can put a short note here
     )
 
@@ -77,6 +77,7 @@ if __name__ == '__main__':
     ds_cifar10_test = ds_cifar10_test.cache()
     ds_cifar10_test = ds_cifar10_test.prefetch(tf.data.AUTOTUNE)
 
+
     # Define the model here
     model = tf.keras.models.Sequential([
         keras.Input(shape=(32, 32, 3)),
@@ -84,8 +85,15 @@ if __name__ == '__main__':
         # Edit code here -- Update the model definition
         # You will need a dense last layer with 10 output channels to classify the 10 classes
         # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
-        layers.Flatten(),
-        layers.Dense(128, activation='relu'),
+	tf.keras.layers.Conv2D(filters=64, kernel_size=[5,5], padding='same', activation='relu'),
+	#tf.keras.layers.BatchNormalization(),
+        tf.keras.layers.MaxPool2D(pool_size=[2,2], strides=2),
+        tf.keras.layers.Conv2D(filters=128, kernel_size=[3,3], padding='same', activation='relu'),
+        #tf.keras.layers.BatchNormalization(),
+        tf.keras.layers.MaxPool2D(pool_size=[2,2], strides=2),
+	layers.Flatten(),
+	layers.Dense(1024, activation='relu'),
+	tf.keras.layers.Dropout(rate=0.5),
         # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
         tf.keras.layers.Dense(10)
     ])
@@ -98,7 +106,7 @@ if __name__ == '__main__':
         # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
         "learning_rate": 0.001,
         "optimizer": "adam",
-        "epochs": 5,
+        "epochs": 10,
         "batch_size": 32
         # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     }
@@ -111,7 +119,7 @@ if __name__ == '__main__':
 
     history = model.fit(
         ds_cifar10_train,
-        epochs=5,
+        epochs=10,
         validation_data=ds_cifar10_test,
         callbacks=[WandbMetricsLogger()]
     )
