@@ -79,8 +79,7 @@ if __name__ == '__main__':
 
 
     # Define the model here
-
-    """
+    
     model = tf.keras.models.Sequential([
         keras.Input(shape=(32, 32, 3)),
         #####################################
@@ -92,31 +91,31 @@ if __name__ == '__main__':
         tf.keras.layers.Conv2D(filters=32, kernel_size=[3,3], padding='same', activation='relu', kernel_initializer='he_uniform'),
         tf.keras.layers.BatchNormalization(),
         tf.keras.layers.MaxPool2D([2,2]),
-        tf.keras.layers.Dropout(rate=0.2),
-
-        tf.keras.layers.Conv2D(filters=64, kernel_size=[3,3], padding='same', activation='relu', kernel_initializer='he_uniform'),
-        tf.keras.layers.BatchNormalization(),
-        tf.keras.layers.Conv2D(filters=64, kernel_size=[3,3], padding='same', activation='relu', kernel_initializer='he_uniform'),
-        tf.keras.layers.BatchNormalization(),
-        tf.keras.layers.MaxPool2D([2,2]),
         tf.keras.layers.Dropout(rate=0.3),
 
-        tf.keras.layers.Conv2D(filters=128, kernel_size=[3,3], padding='same', activation='relu', kernel_initializer='he_uniform'),
+        tf.keras.layers.Conv2D(filters=64, kernel_size=[3,3], padding='same', activation='relu', kernel_initializer='he_uniform'),
         tf.keras.layers.BatchNormalization(),
-        tf.keras.layers.Conv2D(filters=128, kernel_size=[3,3], padding='same', activation='relu', kernel_initializer='he_uniform'),
+        tf.keras.layers.Conv2D(filters=64, kernel_size=[3,3], padding='same', activation='relu', kernel_initializer='he_uniform'),
         tf.keras.layers.BatchNormalization(),
         tf.keras.layers.MaxPool2D([2,2]),
         tf.keras.layers.Dropout(rate=0.4),
 
-	layers.Flatten(),
-	layers.Dense(128, activation='relu', kernel_initializer='he_uniform'),
+        tf.keras.layers.Conv2D(filters=128, kernel_size=[3,3], padding='same', activation='relu', kernel_initializer='he_uniform'),
         tf.keras.layers.BatchNormalization(),
-	tf.keras.layers.Dropout(rate=0.5),
+        tf.keras.layers.Conv2D(filters=128, kernel_size=[3,3], padding='same', activation='relu', kernel_initializer='he_uniform'),
+        tf.keras.layers.BatchNormalization(),
+        tf.keras.layers.MaxPool2D([2,2]),
+        tf.keras.layers.Dropout(rate=0.5),
+
+	layers.Flatten(),
+	layers.Dense(256, activation='relu', kernel_initializer='he_uniform'),
+        tf.keras.layers.BatchNormalization(),
+	tf.keras.layers.Dropout(rate=0.6),
         # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
         tf.keras.layers.Dense(10, activation='softmax')
     ])
-    """
 
+    """
     class Squeeze(tf.keras.Model):
         def __init__(self, name=None, **kwargs):
             super().__init__(**kwargs)
@@ -164,6 +163,7 @@ if __name__ == '__main__':
             return self.softmax(x)
 
     model = Squeeze()
+    """
 
     # Log the training hyper-parameters for WandB
     # If you change these in model.compile() or model.fit(), be sure to update them here.
