@@ -79,40 +79,91 @@ if __name__ == '__main__':
 
 
     # Define the model here
+
+    """
     model = tf.keras.models.Sequential([
         keras.Input(shape=(32, 32, 3)),
         #####################################
         # Edit code here -- Update the model definition
         # You will need a dense last layer with 10 output channels to classify the 10 classes
         # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
-	tf.keras.layers.Conv2D(filters=32, kernel_size=[3,3], padding='same', activation='relu'),
+	tf.keras.layers.Conv2D(filters=32, kernel_size=[3,3], padding='same', activation='relu', kernel_initializer='he_uniform'),
         tf.keras.layers.BatchNormalization(),
-        tf.keras.layers.Conv2D(filters=32, kernel_size=[3,3], padding='same', activation='relu'),
+        tf.keras.layers.Conv2D(filters=32, kernel_size=[3,3], padding='same', activation='relu', kernel_initializer='he_uniform'),
         tf.keras.layers.BatchNormalization(),
         tf.keras.layers.MaxPool2D([2,2]),
         tf.keras.layers.Dropout(rate=0.2),
 
-        tf.keras.layers.Conv2D(filters=64, kernel_size=[3,3], padding='same', activation='relu'),
+        tf.keras.layers.Conv2D(filters=64, kernel_size=[3,3], padding='same', activation='relu', kernel_initializer='he_uniform'),
         tf.keras.layers.BatchNormalization(),
-        tf.keras.layers.Conv2D(filters=64, kernel_size=[3,3], padding='same', activation='relu'),
+        tf.keras.layers.Conv2D(filters=64, kernel_size=[3,3], padding='same', activation='relu', kernel_initializer='he_uniform'),
         tf.keras.layers.BatchNormalization(),
         tf.keras.layers.MaxPool2D([2,2]),
         tf.keras.layers.Dropout(rate=0.3),
 
-        tf.keras.layers.Conv2D(filters=128, kernel_size=[3,3], padding='same', activation='relu'),
+        tf.keras.layers.Conv2D(filters=128, kernel_size=[3,3], padding='same', activation='relu', kernel_initializer='he_uniform'),
         tf.keras.layers.BatchNormalization(),
-        tf.keras.layers.Conv2D(filters=128, kernel_size=[3,3], padding='same', activation='relu'),
+        tf.keras.layers.Conv2D(filters=128, kernel_size=[3,3], padding='same', activation='relu', kernel_initializer='he_uniform'),
         tf.keras.layers.BatchNormalization(),
         tf.keras.layers.MaxPool2D([2,2]),
         tf.keras.layers.Dropout(rate=0.4),
 
 	layers.Flatten(),
-	layers.Dense(128, activation='relu'),
+	layers.Dense(128, activation='relu', kernel_initializer='he_uniform'),
         tf.keras.layers.BatchNormalization(),
 	tf.keras.layers.Dropout(rate=0.5),
         # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
         tf.keras.layers.Dense(10, activation='softmax')
     ])
+    """
+
+    class Squeeze(tf.keras.Model):
+        def __init__(self, name=None, **kwargs):
+            super().__init__(**kwargs)
+
+            self.conv1 = tf.keras.layers.Conv2D(filters=64, kernel_size=[3,3], padding='same', activation='relu', input_shape=[32,32,3])
+            self.pool1 = tf.keras.layers.MaxPool2D(pool_size=[2,2], strides=2)
+
+            self.fire1_sq = tf.keras.layers.Conv2D(filters=32, kernel_size=[1,1], padding='same', activation='relu')
+            self.fire1_e1 = tf.keras.layers.Conv2D(filters=64, kernel_size=[1,1], padding='same', activation='relu')
+            self.fire1_e3 = tf.keras.layers.Conv2D(filters=64, kernel_size=[3,3], padding='same', activation='relu')
+            self.pool2 = tf.keras.layers.MaxPool2D(pool_size=[2,2], strides=2)
+
+            self.fire2_sq = tf.keras.layers.Conv2D(filters=32, kernel_size=[1,1], padding='same', activation='relu')
+            self.fire2_e1 = tf.keras.layers.Conv2D(filters=128, kernel_size=[1,1], padding='same', activation='relu')
+            self.fire2_e3 = tf.keras.layers.Conv2D(filters=128, kernel_size=[3,3], padding='same', activation='relu')
+
+            self.drop1 = tf.keras.layers.Dropout(rate=0.5)
+            
+            self.conv2 = tf.keras.layers.Conv2D(filters=10, kernel_size=[1,1], padding='same', activation='relu')
+            self.apool = tf.keras.layers.GlobalAveragePooling2D()
+            self.flatten = tf.keras.layers.Flatten()
+            self.softmax = tf.keras.layers.Softmax()
+
+        def call(self, x, training=None):
+            x = self.conv1(x)
+            x = self.pool1(x)
+            
+            x = self.fire1_sq(x)
+            e1 = self.fire1_e1(x)
+            e3 = self.fire1_e3(x)
+            x = tf.concat([e1, e3], axis=-1)
+
+            x = self.pool2(x)
+            x = self.fire2_sq(x)
+            e1 = self.fire2_e1(x)
+            e3 = self.fire2_e3(x)
+            x = tf.concat([e1, e3], axis=-1)
+
+            x = self.drop1(x, training=training)
+            
+            x = self.conv2(x)
+            x = self.apool(x)
+            x = self.flatten(x)
+
+            return self.softmax(x)
+
+    model = Squeeze()
 
     # Log the training hyper-parameters for WandB
     # If you change these in model.compile() or model.fit(), be sure to update them here.
@@ -122,7 +173,7 @@ if __name__ == '__main__':
         # vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
         "learning_rate": 0.001,
         "optimizer": "adam",
-        "epochs": 50,
+        "epochs": 100,
         "batch_size": 32
         # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     }
@@ -135,7 +186,7 @@ if __name__ == '__main__':
 
     history = model.fit(
         ds_cifar10_train,
-        epochs=50,
+        epochs=100,
         validation_data=ds_cifar10_test,
         callbacks=[WandbMetricsLogger()]
     )
